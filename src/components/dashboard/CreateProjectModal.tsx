@@ -67,6 +67,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       }
       maxWidth={step === 2 ? "lg" : "md"}
     >
+      {/* Workflow Indicator */}
+      <div className="flex items-center justify-between mb-4 px-3 py-1.5 rounded bg-surface/80 border border-border text-[11px] font-mono text-text-muted select-none">
+        <span className={step === 1 ? "text-accent font-semibold" : "text-text-secondary"}>
+          1. Describe Project
+        </span>
+        <span>&rarr;</span>
+        <span className={step === 2 ? "text-accent font-semibold" : "text-text-secondary"}>
+          2. Choose Layout
+        </span>
+        <span>&rarr;</span>
+        <span className="text-text-muted">3. Edit in Studio</span>
+      </div>
+
       {step === 1 ? (
         /* STEP 1: PROJECT DETAILS */
         <form onSubmit={handleNext} className="space-y-4">

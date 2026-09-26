@@ -146,6 +146,31 @@ export const AIGenerateModal: React.FC<AIGenerateModalProps> = ({
       description="Describe your design brief. ArchXperience synthesizes spatial narratives, layouts, and interactions into a complete deck."
       maxWidth="lg"
     >
+      {/* Workflow Indicator */}
+      <div className="flex items-center justify-between mb-4 px-3 py-1.5 rounded bg-surface/80 border border-border text-[11px] font-mono text-text-muted select-none">
+        <span
+          className={
+            !isGenerating && currentStage !== "finalizing"
+              ? "text-accent font-semibold"
+              : "text-text-secondary"
+          }
+        >
+          1. Describe Brief
+        </span>
+        <span>&rarr;</span>
+        <span
+          className={
+            isGenerating || currentStage === "finalizing"
+              ? "text-accent font-semibold"
+              : "text-text-muted"
+          }
+        >
+          2. AI Synthesis
+        </span>
+        <span>&rarr;</span>
+        <span className="text-text-muted">3. Edit in Studio</span>
+      </div>
+
       {/* 1. GUEST MODE VIEW (Cloud Authentication Required) */}
       {!isCloudAuthenticated ? (
         <div className="py-4 space-y-6">

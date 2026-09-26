@@ -119,6 +119,9 @@ export class LocalStorageProjectRepository implements IProjectRepository {
   async getProjectBySlug(slug: string): Promise<Project | null> {
     const projects = this.loadRaw();
     const found = projects.find((p) => p.shareSlug === slug || p.id === slug) || null;
+    if (!found && (slug === "green-horizon-library" || slug === "ecohub-community-centre")) {
+      return Promise.resolve(ECOHUB_DEMO_PROJECT);
+    }
     return Promise.resolve(found);
   }
 

@@ -221,7 +221,7 @@ export const DashboardPage: React.FC = () => {
   const handleResetDemo = async () => {
     if (isActionPending) return;
     const confirmed = window.confirm(
-      "Reset local workspace to the default EcoHub Community Centre demo project?"
+      "Reset local workspace to the default Green Horizon Community Library demo project?"
     );
     if (confirmed) {
       setIsActionPending(true);
@@ -372,7 +372,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center gap-2.5 text-text-secondary">
                   <Sparkles className="w-4 h-4 text-accent shrink-0" />
                   <span>
-                    Get started by creating a blank presentation, picking an AEC starter template, or inspecting the EcoHub concept.
+                    Get started by creating a blank presentation, picking an AEC starter template, or inspecting the Green Horizon Library concept.
                   </span>
                 </div>
                 <Button

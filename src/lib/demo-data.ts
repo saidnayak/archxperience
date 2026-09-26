@@ -1,10 +1,10 @@
 import type { Project } from "../types";
 
 export const DEMO_PROJECT_ID = "proj-ecohub-centre";
-export const DEMO_PROJECT_SLUG = "ecohub-community-centre";
+export const DEMO_PROJECT_SLUG = "green-horizon-library";
 
 /**
- * Rich conceptual AEC demo project: EcoHub Community Centre
+ * Rich conceptual AEC demo project: Green Horizon Community Library
  * Complete with 6 slides showcasing 1920x1080 virtual coordinate elements:
  * 1. Hero Render & Title
  * 2. Design Concept (Statement, Concept Cards, Spatial Visual)
@@ -15,9 +15,9 @@ export const DEMO_PROJECT_SLUG = "ecohub-community-centre";
  */
 export const ECOHUB_DEMO_PROJECT: Project = {
   id: DEMO_PROJECT_ID,
-  title: "EcoHub Community Centre",
+  title: "Green Horizon Community Library",
   description:
-    "A conceptual sustainable civic space designed around natural daylight, universal accessibility, flexible public spaces, and low-impact regenerative materials.",
+    "A conceptual sustainable civic library designed around natural daylight, universal accessibility, flexible reading lofts, and low-impact mass timber construction.",
   thumbnailUrl:
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
   aspectRatio: "16:9",
@@ -37,7 +37,7 @@ export const ECOHUB_DEMO_PROJECT: Project = {
     {
       id: "slide-hero",
       projectId: DEMO_PROJECT_ID,
-      title: "01 / EcoHub Community Centre",
+      title: "01 / Green Horizon Community Library",
       orderIndex: 0,
       backgroundColor: "#0C0E12",
       backgroundImageUrl:
@@ -79,7 +79,7 @@ export const ECOHUB_DEMO_PROJECT: Project = {
           height: 180,
           zIndex: 10,
           content: {
-            text: "EcoHub Community Centre",
+            text: "Green Horizon Community Library",
             fontSize: 72,
             fontWeight: "bold",
             color: "var(--text-primary)",
@@ -181,7 +181,7 @@ export const ECOHUB_DEMO_PROJECT: Project = {
           zIndex: 5,
           content: {
             src: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
-            alt: "EcoHub Interior Daylit Atrium",
+            alt: "Green Horizon Interior Daylit Atrium",
             objectFit: "cover",
             borderRadius: 8,
           },
@@ -578,7 +578,7 @@ export const ECOHUB_DEMO_PROJECT: Project = {
             afterImageUrl:
               "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80",
             beforeLabel: "Existing Industrial Brownfield (2023)",
-            afterLabel: "Proposed EcoHub Community Centre (2026)",
+            afterLabel: "Proposed Green Horizon Community Library (2026)",
             defaultPosition: 50,
             orientation: "horizontal",
           },

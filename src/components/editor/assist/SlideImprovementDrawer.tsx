@@ -122,7 +122,7 @@ export const SlideImprovementDrawer: React.FC<SlideImprovementDrawerProps> = ({
       triggerAutosave();
 
       setAppliedIds((prev) => new Set(prev).add(change.id));
-      showToast("Applied improvement to slide (Press Ctrl+Z to undo)", "success");
+      showToast("Applied 1 improvement to slide (Ctrl+Z to undo)", "success");
     } catch (applyErr) {
       console.error("[SlideImprovement] Apply failed:", applyErr);
       showToast("Failed to apply suggestion", "danger");
@@ -180,9 +180,13 @@ export const SlideImprovementDrawer: React.FC<SlideImprovementDrawerProps> = ({
       commitTransaction();
       triggerAutosave();
 
+      const countApplied = pendingCount;
       const allIds = new Set(improvementData.suggestedChanges.map((c) => c.id));
       setAppliedIds(allIds);
-      showToast("Applied all improvements (Press Ctrl+Z to revert all)", "success");
+      showToast(
+        `Applied ${countApplied} improvement${countApplied === 1 ? "" : "s"} (Ctrl+Z to undo)`,
+        "success"
+      );
     } catch (err) {
       console.error("[SlideImprovement] Apply all failed:", err);
       showToast("Failed to apply some suggestions", "danger");
@@ -331,6 +335,17 @@ export const SlideImprovementDrawer: React.FC<SlideImprovementDrawerProps> = ({
                     <p className="text-[11px] text-text-secondary leading-relaxed">
                       {change.description}
                     </p>
+
+                    {/* Expected Benefit */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono bg-accent/5 px-2.5 py-1 rounded border border-accent/20">
+                      <span className="font-semibold uppercase tracking-wider text-accent">Benefit:</span>
+                      <span className="text-text-secondary">
+                        {change.action === "modify_text" && "Refines architectural phrasing for client executive clarity."}
+                        {change.action === "adjust_typography" && "Balances reading hierarchy across 1920×1080 artboard."}
+                        {change.action === "convert_to_card" && "Structures raw text into scannable technical specification."}
+                        {change.action === "add_element" && "Engages stakeholders with interactive spatial inspection."}
+                      </span>
+                    </div>
 
                     {/* Diff: Current vs Proposed */}
                     {(change.currentValue || change.proposedValue) && (

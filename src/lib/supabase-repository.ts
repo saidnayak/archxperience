@@ -169,6 +169,7 @@ export class SupabaseProjectRepository implements IProjectRepository {
   }
 
   async getProject(id: string): Promise<Project | null> {
+    if (!isUuid(id)) return null;
     const { data: projectRow, error: projError } = await this.client
       .from("projects")
       .select("*")
@@ -602,10 +603,10 @@ export class SupabaseProjectRepository implements IProjectRepository {
   }
 
   async resetToDemo(): Promise<Project[]> {
-    // In cloud mode, resetToDemo imports the default EcoHub demo project into user's account
+    // In cloud mode, resetToDemo imports the default flagship demo project into user's account
     await this.createProject({
       ...ECOHUB_DEMO_PROJECT,
-      title: "EcoHub Community Centre (Cloud)",
+      title: "Green Horizon Community Library (Cloud)",
       isPublished: false,
     });
     return this.getProjects();

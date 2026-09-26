@@ -31,10 +31,9 @@ export interface ExperienceReviewDrawerProps {
 }
 
 const LOADING_STAGES = [
-  "Running layout checks",
-  "Reviewing narrative",
-  "Checking AEC completeness",
-  "Evaluating audience fit",
+  "Reviewing presentation",
+  "Analyzing layout",
+  "Evaluating AEC communication",
   "Preparing recommendations",
 ];
 
@@ -48,7 +47,7 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
   onTriggerHotspots,
 }) => {
   const { mode } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<"issues" | "summary" | "checklist" | "suggestions">("issues");
+  const [activeTab, setActiveTab] = useState<"summary" | "strengths" | "issues" | "checklist">("summary");
   const [severityFilter, setSeverityFilter] = useState<"all" | IssueSeverity>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStageIndex, setLoadingStageIndex] = useState(0);
@@ -130,14 +129,14 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
           <button
             onClick={handleRunReview}
             disabled={isLoading}
-            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-surface transition-colors disabled:opacity-50"
+            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-surface transition-colors disabled:opacity-50 cursor-pointer"
             title="Re-run Review"
           >
             <RotateCcw className={cn("w-4 h-4", isLoading && "animate-spin text-accent")} />
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
+            className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-surface transition-colors cursor-pointer"
             title="Close Drawer"
           >
             <X className="w-4 h-4" />
@@ -147,18 +146,42 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
 
       {/* Guest Mode Banner if active */}
       {mode === "guest" && (
-        <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-[11px] text-amber-300 flex items-center gap-2 font-mono">
+        <div className="px-4 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-[11px] text-amber-300 flex items-center gap-2 font-mono">
           <ShieldCheck className="w-4 h-4 shrink-0 text-amber-400" />
-          <span>Local deterministic review active. Sign in for AI critique.</span>
+          <span>Local deterministic review is available. Sign in to unlock AI critique.</span>
         </div>
       )}
 
-      {/* Tab Navigation */}
-      <div className="flex items-center border-b border-border px-3 bg-surface text-xs font-mono">
+      {/* Tab Navigation: Executive Summary -> Strengths -> Issues -> AEC Checklist */}
+      <div className="flex items-center border-b border-border px-2 bg-surface text-xs font-mono overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("summary")}
+          className={cn(
+            "py-2.5 px-3 border-b-2 font-medium transition-colors whitespace-nowrap cursor-pointer",
+            activeTab === "summary"
+              ? "border-accent text-accent"
+              : "border-transparent text-text-muted hover:text-text-primary"
+          )}
+        >
+          Executive Summary
+        </button>
+
+        <button
+          onClick={() => setActiveTab("strengths")}
+          className={cn(
+            "py-2.5 px-3 border-b-2 font-medium transition-colors whitespace-nowrap cursor-pointer",
+            activeTab === "strengths"
+              ? "border-accent text-accent"
+              : "border-transparent text-text-muted hover:text-text-primary"
+          )}
+        >
+          Strengths
+        </button>
+
         <button
           onClick={() => setActiveTab("issues")}
           className={cn(
-            "py-2.5 px-3 border-b-2 font-medium transition-colors flex items-center gap-1.5",
+            "py-2.5 px-3 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer",
             activeTab === "issues"
               ? "border-accent text-accent"
               : "border-transparent text-text-muted hover:text-text-primary"
@@ -171,39 +194,15 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
         </button>
 
         <button
-          onClick={() => setActiveTab("summary")}
-          className={cn(
-            "py-2.5 px-3 border-b-2 font-medium transition-colors",
-            activeTab === "summary"
-              ? "border-accent text-accent"
-              : "border-transparent text-text-muted hover:text-text-primary"
-          )}
-        >
-          Summary & Strengths
-        </button>
-
-        <button
           onClick={() => setActiveTab("checklist")}
           className={cn(
-            "py-2.5 px-3 border-b-2 font-medium transition-colors",
+            "py-2.5 px-3 border-b-2 font-medium transition-colors whitespace-nowrap cursor-pointer",
             activeTab === "checklist"
               ? "border-accent text-accent"
               : "border-transparent text-text-muted hover:text-text-primary"
           )}
         >
           AEC Checklist
-        </button>
-
-        <button
-          onClick={() => setActiveTab("suggestions")}
-          className={cn(
-            "py-2.5 px-3 border-b-2 font-medium transition-colors",
-            activeTab === "suggestions"
-              ? "border-accent text-accent"
-              : "border-transparent text-text-muted hover:text-text-primary"
-          )}
-        >
-          Strategy
         </button>
       </div>
 
@@ -221,232 +220,270 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
                   <div
                     key={stg}
                     className={cn(
-                      "h-1 rounded-full transition-all duration-300",
-                      idx === loadingStageIndex
-                        ? "w-6 bg-accent shadow-[0_0_8px_rgba(200,97,62,0.8)]"
-                        : idx < loadingStageIndex
-                        ? "w-2.5 bg-accent/60"
-                        : "w-2 bg-border"
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      idx <= loadingStageIndex
+                        ? "bg-accent scale-105"
+                        : "bg-border opacity-40"
                     )}
                   />
                 ))}
               </div>
-              <p className="text-[10px] text-text-muted font-mono pt-1">
-                Deterministic layout checks resolved immediately. Analyzing spatial pitch.
-              </p>
             </div>
+          </div>
+        ) : !reviewData ? (
+          <div className="py-16 text-center text-xs text-text-muted space-y-3">
+            <p>No review data generated yet.</p>
+            <Button size="sm" variant="secondary" onClick={handleRunReview}>
+              Analyze Presentation
+            </Button>
           </div>
         ) : (
           <>
-            {/* TAB: ISSUES */}
-            {activeTab === "issues" && (
-              <div className="space-y-3">
-                {/* Severity Filter Pills */}
-                <div className="flex items-center gap-1.5 pb-1">
-                  <button
-                    onClick={() => setSeverityFilter("all")}
-                    className={cn(
-                      "text-[11px] font-mono px-2 py-0.5 rounded transition-colors",
-                      severityFilter === "all"
-                        ? "bg-accent text-white font-medium"
-                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
-                    )}
-                  >
-                    All ({reviewData?.issues.length || 0})
-                  </button>
-                  <button
-                    onClick={() => setSeverityFilter("error")}
-                    className={cn(
-                      "text-[11px] font-mono px-2 py-0.5 rounded transition-colors flex items-center gap-1",
-                      severityFilter === "error"
-                        ? "bg-rose-500/20 text-rose-300 font-medium border border-rose-500/40"
-                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
-                    )}
-                  >
-                    <AlertCircle className="w-3 h-3 text-rose-400" />
-                    <span>Errors ({issueCounts.error})</span>
-                  </button>
-                  <button
-                    onClick={() => setSeverityFilter("warning")}
-                    className={cn(
-                      "text-[11px] font-mono px-2 py-0.5 rounded transition-colors flex items-center gap-1",
-                      severityFilter === "warning"
-                        ? "bg-amber-500/20 text-amber-300 font-medium border border-amber-500/40"
-                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
-                    )}
-                  >
-                    <AlertTriangle className="w-3 h-3 text-amber-400" />
-                    <span>Warnings ({issueCounts.warning})</span>
-                  </button>
-                  <button
-                    onClick={() => setSeverityFilter("suggestion")}
-                    className={cn(
-                      "text-[11px] font-mono px-2 py-0.5 rounded transition-colors flex items-center gap-1",
-                      severityFilter === "suggestion"
-                        ? "bg-sky-500/20 text-sky-300 font-medium border border-sky-500/40"
-                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
-                    )}
-                  >
-                    <Info className="w-3 h-3 text-sky-400" />
-                    <span>Tips ({issueCounts.suggestion})</span>
-                  </button>
-                </div>
-
-                {filteredIssues.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-border rounded p-6 bg-surface-subtle/30">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                    <p className="text-xs font-semibold text-text-primary">No Issues Found</p>
-                    <p className="text-[11px] text-text-secondary mt-1">
-                      {severityFilter === "all"
-                        ? "All slides pass layout, text density, and geometry standards."
-                        : `No ${severityFilter} items found.`}
-                    </p>
-                  </div>
-                ) : (
-                  filteredIssues.map((issue) => {
-                    const slideIndex =
-                      issue.slideIndex !== undefined
-                        ? issue.slideIndex + 1
-                        : issue.slideId
-                        ? project.slides.findIndex((s) => s.id === issue.slideId) + 1
-                        : null;
-
-                    return (
-                      <div
-                        key={issue.id}
-                        className="p-3 rounded border border-border bg-surface-elevated/40 hover:border-border-strong hover:bg-surface-elevated transition-all text-left space-y-2 group"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            {issue.severity === "error" && (
-                              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                            )}
-                            {issue.severity === "warning" && (
-                              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                            )}
-                            {issue.severity === "suggestion" && (
-                              <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
-                            )}
-                            <h4 className="text-xs font-semibold text-text-primary leading-tight">
-                              {issue.title}
-                            </h4>
-                          </div>
-
-                          <div className="flex items-center gap-1 shrink-0">
-                            {issue.source === "ai" && (
-                              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                                AI
-                              </span>
-                            )}
-                            {slideIndex && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-text-muted">
-                                Slide {slideIndex}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <p className="text-[11px] text-text-secondary leading-relaxed pl-6">
-                          {issue.message}
-                        </p>
-
-                        {/* Interactive Quick-Actions */}
-                        <div className="pt-1 flex items-center justify-between pl-6 border-t border-border/40">
-                          {issue.slideId ? (
-                            <button
-                              onClick={() => {
-                                onSelectSlide(issue.slideId!);
-                                if (issue.elementId) onSelectElement(issue.elementId);
-                              }}
-                              className="text-[11px] font-mono text-accent hover:underline flex items-center gap-1"
-                            >
-                              <span>Inspect on Canvas</span>
-                              <ChevronRight className="w-3 h-3" />
-                            </button>
-                          ) : (
-                            <div />
-                          )}
-
-                          <div className="flex items-center gap-1.5">
-                            {issue.suggestedAction === "add_hotspots" && onTriggerHotspots && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 text-[10px] px-2"
-                                leftIcon={<MapPin className="w-3 h-3 text-accent" />}
-                                onClick={() => {
-                                  if (issue.slideId) onSelectSlide(issue.slideId);
-                                  if (issue.elementId) {
-                                    onSelectElement(issue.elementId);
-                                    onTriggerHotspots(issue.elementId);
-                                  }
-                                }}
-                              >
-                                Suggest Hotspots
-                              </Button>
-                            )}
-
-                            {(issue.suggestedAction === "shorten_text" ||
-                              issue.suggestedAction === "adjust_typography") &&
-                              onTriggerImproveSlide && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-6 text-[10px] px-2"
-                                  leftIcon={<Sparkles className="w-3 h-3 text-accent" />}
-                                  onClick={() => {
-                                    if (issue.slideId) {
-                                      onSelectSlide(issue.slideId);
-                                      onTriggerImproveSlide(issue.slideId);
-                                    }
-                                  }}
-                                >
-                                  Improve Slide
-                                </Button>
-                              )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            )}
-
-            {/* TAB: SUMMARY & STRENGTHS */}
+            {/* TAB 1: EXECUTIVE SUMMARY */}
             {activeTab === "summary" && (
               <div className="space-y-4">
-                <div className="p-3.5 rounded border border-border bg-surface-elevated/40 space-y-2">
+                <div className="p-4 rounded-lg border border-border bg-surface-elevated/50 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-text-primary">
                     <Zap className="w-3.5 h-3.5 text-accent" />
                     <span>Executive Summary</span>
                   </div>
                   <p className="text-xs text-text-secondary leading-relaxed font-sans">
-                    {reviewData?.executiveSummary}
+                    {reviewData.executiveSummary}
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-text-primary flex items-center gap-1.5 font-mono uppercase tracking-wider">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Presentation Strengths</span>
-                  </h4>
-                  <div className="space-y-2">
-                    {reviewData?.strengths.map((str, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-200 flex items-start gap-2.5"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                        <span className="leading-relaxed">{str}</span>
-                      </div>
-                    ))}
+                {/* Strategic Advice Card */}
+                {reviewData.strategicSuggestions && reviewData.strategicSuggestions.length > 0 && (
+                  <div className="p-4 rounded-lg border border-accent/20 bg-accent/5 space-y-2.5">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-accent font-semibold block">
+                      AEC Strategic Advice
+                    </span>
+                    <div className="space-y-2">
+                      {reviewData.strategicSuggestions.map((sug, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-xs text-text-primary">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                          <span className="leading-relaxed text-text-secondary">{sug}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                )}
+
+                {/* Quick Navigation to Issues */}
+                <div className="pt-2 flex items-center justify-between text-xs">
+                  <span className="text-text-muted font-mono">
+                    {reviewData.issues.length} audit finding{reviewData.issues.length === 1 ? "" : "s"}
+                  </span>
+                  <button
+                    onClick={() => setActiveTab("issues")}
+                    className="text-accent hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View Identified Issues</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* TAB: AEC CHECKLIST */}
+            {/* TAB 2: STRENGTHS */}
+            {activeTab === "strengths" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-text-muted uppercase tracking-wider">
+                    Validated Spatial Strengths
+                  </span>
+                  <Badge size="sm" variant="success">
+                    {reviewData.strengths.length} Confirmed
+                  </Badge>
+                </div>
+
+                <div className="space-y-2.5">
+                  {reviewData.strengths.map((str, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-lg border border-emerald-500/25 bg-emerald-500/5 text-xs text-emerald-200 flex items-start gap-2.5"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                      <span className="leading-relaxed">{str}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: ISSUES */}
+            {activeTab === "issues" && (
+              <div className="space-y-4">
+                {/* Severity Quick Filters */}
+                <div className="flex items-center gap-1.5 text-[11px] font-mono">
+                  <button
+                    onClick={() => setSeverityFilter("all")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      severityFilter === "all"
+                        ? "bg-accent text-text-primary font-medium"
+                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
+                    )}
+                  >
+                    All ({reviewData.issues.length})
+                  </button>
+                  <button
+                    onClick={() => setSeverityFilter("error")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      severityFilter === "error"
+                        ? "bg-rose-500 text-white font-medium"
+                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
+                    )}
+                  >
+                    Errors ({issueCounts.error})
+                  </button>
+                  <button
+                    onClick={() => setSeverityFilter("warning")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      severityFilter === "warning"
+                        ? "bg-amber-500 text-black font-medium"
+                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
+                    )}
+                  >
+                    Warnings ({issueCounts.warning})
+                  </button>
+                  <button
+                    onClick={() => setSeverityFilter("suggestion")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      severityFilter === "suggestion"
+                        ? "bg-sky-500 text-white font-medium"
+                        : "bg-surface-elevated text-text-muted hover:text-text-primary"
+                    )}
+                  >
+                    Tips ({issueCounts.suggestion})
+                  </button>
+                </div>
+
+                {/* Filtered Issue Cards */}
+                <div className="space-y-3">
+                  {filteredIssues.length === 0 ? (
+                    <div className="p-8 text-center border border-border rounded-lg bg-surface-elevated/20 text-xs text-text-muted">
+                      No issues found for this severity filter.
+                    </div>
+                  ) : (
+                    filteredIssues.map((issue) => {
+                      const slideIndex = issue.slideIndex !== undefined
+                        ? issue.slideIndex + 1
+                        : issue.slideId
+                        ? (project.slides.findIndex((s) => s.id === issue.slideId) + 1 || undefined)
+                        : undefined;
+
+                      return (
+                        <div
+                          key={issue.id}
+                          className="p-3.5 rounded-lg border border-border bg-surface-elevated/40 hover:border-border-strong transition-all space-y-2.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {issue.severity === "error" && (
+                                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                              )}
+                              {issue.severity === "warning" && (
+                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                              )}
+                              {issue.severity === "suggestion" && (
+                                <Info className="w-4 h-4 text-sky-400 shrink-0" />
+                              )}
+                              <h4 className="text-xs font-semibold text-text-primary leading-tight">
+                                {issue.title}
+                              </h4>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {issue.source === "ai" ? (
+                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent border border-accent/40 font-semibold">
+                                  AI Critique
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-text-muted font-medium">
+                                  Rule Check
+                                </span>
+                              )}
+                              {slideIndex && (
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-text-muted">
+                                  Slide {slideIndex}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <p className="text-[11px] text-text-secondary leading-relaxed pl-6">
+                            {issue.message}
+                          </p>
+
+                          {/* Interactive Quick-Actions */}
+                          <div className="pt-2 flex items-center justify-between pl-6 border-t border-border/40">
+                            {issue.slideId ? (
+                              <button
+                                onClick={() => {
+                                  onSelectSlide(issue.slideId!);
+                                  if (issue.elementId) onSelectElement(issue.elementId);
+                                }}
+                                className="text-[11px] font-mono text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>Inspect on Canvas</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            ) : (
+                              <div />
+                            )}
+
+                            <div className="flex items-center gap-1.5">
+                              {issue.suggestedAction === "add_hotspots" && onTriggerHotspots && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-6 text-[10px] px-2"
+                                  leftIcon={<MapPin className="w-3 h-3 text-accent" />}
+                                  onClick={() => {
+                                    if (issue.slideId) onSelectSlide(issue.slideId);
+                                    if (issue.elementId) {
+                                      onSelectElement(issue.elementId);
+                                      onTriggerHotspots(issue.elementId);
+                                    }
+                                  }}
+                                >
+                                  Suggest Hotspots
+                                </Button>
+                              )}
+
+                              {(issue.suggestedAction === "shorten_text" ||
+                                issue.suggestedAction === "adjust_typography") &&
+                                onTriggerImproveSlide && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 text-[10px] px-2"
+                                    leftIcon={<Sparkles className="w-3 h-3 text-accent" />}
+                                    onClick={() => {
+                                      if (issue.slideId) {
+                                        onSelectSlide(issue.slideId);
+                                        onTriggerImproveSlide(issue.slideId);
+                                      }
+                                    }}
+                                  >
+                                    Improve Slide
+                                  </Button>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: AEC CHECKLIST */}
             {activeTab === "checklist" && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -454,13 +491,13 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
                     {project.category || "Architecture"} Standards
                   </span>
                   <Badge size="sm" variant="default">
-                    {reviewData?.checklist.filter((c) => c.status === "pass").length || 0} /{" "}
-                    {reviewData?.checklist.length || 0} Complete
+                    {reviewData.checklist.filter((c) => c.status === "pass").length} /{" "}
+                    {reviewData.checklist.length} Complete
                   </Badge>
                 </div>
 
                 <div className="space-y-2">
-                  {reviewData?.checklist.map((item, idx) => (
+                  {reviewData.checklist.map((item, idx) => (
                     <div
                       key={idx}
                       className="p-3 rounded border border-border bg-surface-elevated/40 space-y-1.5"
@@ -479,29 +516,6 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
                         </span>
                       </div>
                       <p className="text-[11px] text-text-secondary">{item.notes}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB: STRATEGIC SUGGESTIONS */}
-            {activeTab === "suggestions" && (
-              <div className="space-y-3">
-                <p className="text-[11px] text-text-muted">
-                  High-level opportunities to elevate presentation persuasion and clarity:
-                </p>
-                <div className="space-y-2.5">
-                  {reviewData?.strategicSuggestions.map((sug, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 rounded border border-accent/20 bg-accent/5 space-y-1 text-xs text-text-primary"
-                    >
-                      <div className="flex items-center gap-2 text-accent font-semibold">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Strategic Opportunity {idx + 1}</span>
-                      </div>
-                      <p className="text-[11px] text-text-secondary leading-relaxed">{sug}</p>
                     </div>
                   ))}
                 </div>

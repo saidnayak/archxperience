@@ -18,6 +18,10 @@ import {
   Compass,
   FileSpreadsheet,
   CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Share2,
+  Sliders,
 } from "lucide-react";
 import { DEMO_PROJECT_ID } from "../lib/demo-data";
 
@@ -81,7 +85,7 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-background text-text-primary">
       <TopNavigation variant="marketing" />
 
-      {/* Hero Section */}
+      {/* 1. Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32 border-b border-border grid-pattern">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -100,7 +104,7 @@ export const LandingPage: React.FC = () => {
               variants={fadeUp}
               className="text-4xl sm:text-6xl md:text-7xl font-display font-bold tracking-tight text-text-primary text-balance"
             >
-              Present the design. <br />
+              Don’t just present the design. <br />
               <span className="text-accent">Let them experience it.</span>
             </motion.h1>
 
@@ -108,7 +112,7 @@ export const LandingPage: React.FC = () => {
               variants={fadeUp}
               className="text-base sm:text-lg md:text-xl text-text-secondary max-w-2xl mx-auto font-light leading-relaxed"
             >
-              ArchXperience turns static architectural slides into interactive digital journeys.
+              ArchXperience transforms static architectural presentations into interactive digital journeys.
               Allow clients, consultants, and juries to explore spaces, inspect material callouts,
               and compare design iterations dynamically.
             </motion.p>
@@ -117,14 +121,14 @@ export const LandingPage: React.FC = () => {
               variants={fadeUp}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
             >
-              <Link to={`/editor/${DEMO_PROJECT_ID}`} className="w-full sm:w-auto">
+              <Link to="/dashboard" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="primary"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                   className="w-full sm:w-auto"
                 >
-                  Create an Experience
+                  Create Experience
                 </Button>
               </Link>
               <a href="#showcase" className="w-full sm:w-auto">
@@ -142,7 +146,83 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Product Concept: Static vs Interactive */}
+      {/* 2. Product Story / How It Works: The 5-Step Pipeline */}
+      <section id="workflow" className="py-20 border-b border-border bg-surface/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <Badge variant="default" size="sm">
+              The Product Journey
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-display font-semibold text-text-primary">
+              How ArchXperience Works
+            </h2>
+            <p className="text-xs sm:text-sm text-text-secondary">
+              From raw design brief to published interactive experience in five fluid steps.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+            {[
+              {
+                step: "01",
+                title: "Static Presentation",
+                desc: "Start with existing 2D CAD drawings, perspective renders, and site plans.",
+                icon: <Layers className="w-4 h-4 text-accent" />,
+              },
+              {
+                step: "02",
+                title: "AI Generation",
+                desc: "Describe your AEC brief. AI synthesizes a structured, multi-slide presentation.",
+                icon: <Sparkles className="w-4 h-4 text-accent" />,
+              },
+              {
+                step: "03",
+                title: "AEC Intelligence",
+                desc: "Automated review audits layout density, technical specs, and persona tone.",
+                icon: <ShieldCheck className="w-4 h-4 text-accent" />,
+              },
+              {
+                step: "04",
+                title: "Interactive Studio",
+                desc: "Position clickable hotspots, add split comparison sliders, and refine drawings.",
+                icon: <Sliders className="w-4 h-4 text-accent" />,
+              },
+              {
+                step: "05",
+                title: "Published Experience",
+                desc: "Publish a clean client-ready link that stakeholders explore at their own pace.",
+                icon: <Share2 className="w-4 h-4 text-accent" />,
+              },
+            ].map((st, i) => (
+              <div
+                key={st.step}
+                className="p-4 rounded border border-border bg-surface-elevated/70 flex flex-col justify-between relative group hover:border-accent/40 transition-colors"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-mono text-accent font-semibold tracking-wider">
+                      {st.step}
+                    </span>
+                    <div className="w-7 h-7 rounded bg-surface border border-border flex items-center justify-center">
+                      {st.icon}
+                    </div>
+                  </div>
+                  <h3 className="text-xs font-semibold text-text-primary mb-1.5">{st.title}</h3>
+                  <p className="text-[11px] text-text-secondary leading-relaxed">{st.desc}</p>
+                </div>
+
+                {i < 4 && (
+                  <div className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-border-strong">
+                    &rarr;
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Product Concept: Static vs Interactive */}
       <section id="concept" className="py-20 border-b border-border bg-surface/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
@@ -150,7 +230,7 @@ export const LandingPage: React.FC = () => {
               The Evolution of Architectural Presentations
             </h2>
             <p className="text-xs sm:text-sm text-text-secondary">
-              Static slides force clients to passively watch. ArchXperience turns every drawing and render into a tactile, navigable presentation.
+              Static slide decks force clients to passively watch. ArchXperience turns every drawing and render into a tactile, navigable presentation.
             </p>
           </div>
 
@@ -218,7 +298,80 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Interactive AEC Showcase Teaser (Live Interactive Prototype) */}
+      {/* 4. AI Generation & AEC Intelligence Section */}
+      <section id="ai-features" className="py-20 border-b border-border bg-surface/20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <Badge variant="accent" size="sm">
+              Intelligence Built for AEC
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-display font-semibold text-text-primary">
+              AI Presentation Generator & AEC Review
+            </h2>
+            <p className="text-xs sm:text-sm text-text-secondary">
+              Not a generic chatbot. Purpose-built tools trained on spatial communication, building standards, and client psychology.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* AI Generator Spotlight */}
+            <div className="p-6 rounded-lg border border-border bg-surface-elevated/60 space-y-4">
+              <div className="w-9 h-9 rounded bg-accent/15 border border-accent/30 text-accent flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <h3 className="text-base font-semibold text-text-primary">
+                AI Presentation Generator
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Describe your project brief, architectural style, and target audience. Gemini 2.5 Flash synthesizes a tailored multi-slide experience complete with title slides, spatial concepts, floor plans, and sustainability specs.
+              </p>
+              <div className="pt-2 space-y-2 text-xs text-text-muted">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Structured 1920×1080 canvas element layout generation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Curated architectural imagery & spatial themes</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Interactive starter hotspots & comparison blocks</span>
+                </div>
+              </div>
+            </div>
+
+            {/* AEC Intelligence Spotlight */}
+            <div className="p-6 rounded-lg border border-border bg-surface-elevated/60 space-y-4">
+              <div className="w-9 h-9 rounded bg-accent/15 border border-accent/30 text-accent flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <h3 className="text-base font-semibold text-text-primary">
+                AEC Intelligence Engine
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Experience Review audits your presentation against 15 deterministic architectural rules. The Slide Assistant suggests non-destructive improvements with before/after diffs, and the Hotspot Advisor suggests technical pin placements.
+              </p>
+              <div className="pt-2 space-y-2 text-xs text-text-muted">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Deterministic quality checks + AI narrative critique</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Audience Tuner: Client, Academic Jury, & Investor personas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span>Non-destructive slide improvements with atomic undo/redo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Interactive AEC Showcase Teaser (Live Interactive Prototype) */}
       <section id="showcase" className="py-20 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
@@ -291,7 +444,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Before/After Design Comparison Showcase */}
+      {/* 6. Before/After Design Comparison Showcase */}
       <section className="py-20 border-b border-border bg-surface/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
@@ -318,7 +471,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Capabilities Overview */}
+      {/* 7. Capabilities Overview */}
       <section id="features" className="py-20 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
@@ -326,7 +479,7 @@ export const LandingPage: React.FC = () => {
               Platform Capabilities
             </Badge>
             <h2 className="text-2xl sm:text-3xl font-display font-semibold text-text-primary">
-              Engineered for the Spatial & AEC Industries
+              Engineered for Spatial & AEC Teams
             </h2>
             <p className="text-xs sm:text-sm text-text-secondary">
               Tools specifically tailored to showcase physical spaces, building performance, and material choices.
@@ -367,7 +520,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* AEC Use Cases */}
+      {/* 8. AEC Personas */}
       <section id="use-cases" className="py-20 border-b border-border bg-surface/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
@@ -394,7 +547,7 @@ export const LandingPage: React.FC = () => {
                 desc: "Marketing suites, leasing presentations, and stakeholder tours.",
               },
               {
-                title: "Design Students",
+                title: "Design Students & Faculty",
                 desc: "Thesis reviews, portfolio showcases, and academic jury defenses.",
               },
             ].map((uc, i) => (
@@ -413,26 +566,32 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* 9. Final Call to Action */}
       <section className="py-20 relative overflow-hidden grid-pattern">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6">
           <h2 className="text-3xl sm:text-4xl font-display font-bold text-text-primary">
-            Ready to elevate your architectural presentations?
+            Don’t just present the design. <br />
+            <span className="text-accent">Let them experience it.</span>
           </h2>
-          <p className="text-sm text-text-secondary max-w-xl mx-auto">
-            Experience the studio in local mode today. Build projects, position interactive elements, and share with your team.
+          <p className="text-sm text-text-secondary max-w-xl mx-auto leading-relaxed">
+            Create presentations that stakeholders can navigate, inspect, and understand. Launch Studio in your browser or explore our conceptual flagship project.
           </p>
-          <div className="flex items-center justify-center gap-4 pt-2">
-            <Link to={`/editor/${DEMO_PROJECT_ID}`}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <Link to="/dashboard" className="w-full sm:w-auto">
               <Button size="lg" variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Launch ArchXperience Studio
+                Create Experience
+              </Button>
+            </Link>
+            <Link to={`/editor/${DEMO_PROJECT_ID}`} className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" leftIcon={<Eye className="w-4 h-4" />}>
+                Explore Live Demo
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Honest Footer */}
+      {/* 10. Honest Footer */}
       <footer className="border-t border-border bg-surface py-12 text-xs text-text-secondary">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
