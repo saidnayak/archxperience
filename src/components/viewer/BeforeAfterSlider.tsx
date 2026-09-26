@@ -21,7 +21,21 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
 }) => {
   const [split, setSplit] = useState(initialSplit);
   const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const update = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
@@ -93,7 +107,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           src={beforeImage}
           alt={beforeLabel}
           className="absolute inset-0 w-full h-full object-cover max-w-none pointer-events-none"
-          style={{ width: containerRef.current?.clientWidth || "100%" }}
+          style={{ width: containerWidth ? `${containerWidth}px` : "100%" }}
         />
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-surface/85 backdrop-blur-xs text-[11px] font-mono text-text-primary border border-border pointer-events-none">
           {beforeLabel}

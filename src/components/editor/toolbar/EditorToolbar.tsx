@@ -303,7 +303,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           onClick={onOpenReview}
           className="border-accent/30 hover:border-accent hover:bg-accent/10 text-xs font-medium shadow-sm"
         >
-          Review
+          Experience Review
         </Button>
 
         <Button

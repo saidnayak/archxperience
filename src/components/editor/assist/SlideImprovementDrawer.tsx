@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { Project, Slide } from "../../../types";
 import type { SlideImprovementResponse, SlideImprovementChange, IssueItem } from "../../../lib/ai";
 import { requestSlideImprovement } from "../../../lib/ai";
@@ -48,7 +48,7 @@ export const SlideImprovementDrawer: React.FC<SlideImprovementDrawerProps> = ({
 
   const { showToast } = useToast();
 
-  const handleFetchImprovements = async () => {
+  const handleFetchImprovements = useCallback(async () => {
     if (!slide) return;
     setIsLoading(true);
     setError(null);
@@ -62,13 +62,16 @@ export const SlideImprovementDrawer: React.FC<SlideImprovementDrawerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [project, slide, deterministicIssues]);
 
   useEffect(() => {
     if (isOpen && slide) {
-      handleFetchImprovements();
+      const timer = setTimeout(() => {
+        handleFetchImprovements();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, slide?.id]);
+  }, [isOpen, slide, handleFetchImprovements]);
 
   if (!isOpen || !slide) return null;
 

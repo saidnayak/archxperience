@@ -331,7 +331,7 @@ Ensure all canvas elements have valid 1920x1080 coordinates, non-overlapping bou
         if (parsedErr?.error?.message) {
           sanitizedError = parsedErr.error.message;
         }
-      } catch (_) {
+      } catch {
         if (lastErrorText) sanitizedError = lastErrorText.substring(0, 200);
       }
 

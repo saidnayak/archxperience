@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { Project } from "../../../types";
 import type { PresentationReviewResponse, IssueSeverity } from "../../../lib/ai";
 import { executeExperienceReview } from "../../../lib/ai";
@@ -30,6 +30,14 @@ export interface ExperienceReviewDrawerProps {
   onTriggerHotspots?: (elementId: string) => void;
 }
 
+const LOADING_STAGES = [
+  "Running layout checks",
+  "Reviewing narrative",
+  "Checking AEC completeness",
+  "Evaluating audience fit",
+  "Preparing recommendations",
+];
+
 export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
   isOpen,
   onClose,
@@ -43,11 +51,26 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
   const [activeTab, setActiveTab] = useState<"issues" | "summary" | "checklist" | "suggestions">("issues");
   const [severityFilter, setSeverityFilter] = useState<"all" | IssueSeverity>("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStageIndex, setLoadingStageIndex] = useState(0);
   const [reviewData, setReviewData] = useState<PresentationReviewResponse | null>(null);
 
+  // Cycle through loading stages during evaluation
+  useEffect(() => {
+    if (!isLoading) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingStageIndex((prev) =>
+        prev < LOADING_STAGES.length - 1 ? prev + 1 : prev
+      );
+    }, 1100);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   // Run or refresh review
-  const handleRunReview = async () => {
+  const handleRunReview = useCallback(async () => {
     setIsLoading(true);
+    setLoadingStageIndex(0);
     try {
       const res = await executeExperienceReview(project);
       setReviewData(res);
@@ -56,14 +79,17 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [project]);
 
   // Run review on initial open if not present
   useEffect(() => {
     if (isOpen && !reviewData && !isLoading) {
-      handleRunReview();
+      const timer = setTimeout(() => {
+        handleRunReview();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, reviewData, isLoading, handleRunReview]);
 
   const filteredIssues = useMemo(() => {
     if (!reviewData?.issues) return [];
@@ -184,12 +210,29 @@ export const ExperienceReviewDrawer: React.FC<ExperienceReviewDrawerProps> = ({
       {/* Main Drawer Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoading ? (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-center">
-            <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-text-primary">Evaluating Presentation...</p>
-              <p className="text-[11px] text-text-muted font-mono">
-                Inspecting geometry, spatial hierarchy & architectural storytelling
+          <div className="py-16 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="w-9 h-9 rounded-full border-2 border-accent border-t-transparent animate-spin shadow-lg" />
+            <div className="space-y-2 max-w-[280px]">
+              <p className="text-xs font-semibold text-text-primary tracking-tight">
+                {LOADING_STAGES[loadingStageIndex]}...
+              </p>
+              <div className="flex items-center justify-center gap-1.5 pt-1">
+                {LOADING_STAGES.map((stg, idx) => (
+                  <div
+                    key={stg}
+                    className={cn(
+                      "h-1 rounded-full transition-all duration-300",
+                      idx === loadingStageIndex
+                        ? "w-6 bg-accent shadow-[0_0_8px_rgba(200,97,62,0.8)]"
+                        : idx < loadingStageIndex
+                        ? "w-2.5 bg-accent/60"
+                        : "w-2 bg-border"
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-[10px] text-text-muted font-mono pt-1">
+                Deterministic layout checks resolved immediately. Analyzing spatial pitch.
               </p>
             </div>
           </div>

@@ -120,7 +120,7 @@ export function runDeterministicReview(project: Project): {
       // Exclude full-bleed background images and full-screen comparison sliders
       const isFullBleed = (el.type === "image" || el.type === "comparison") && el.width >= 1800;
       if (!isFullBleed) {
-        if (el.x < 50 || el.x + el.width > 1870 || el.y < 50 || el.y + el.height > 1030) {
+        if (el.x < 60 || el.x + el.width > 1860 || el.y < 60 || el.y + el.height > 1020) {
           issues.push({
             id: `safe-margin-${el.id}`,
             title: `Safe Margin Warning (Slide ${slideNumber})`,
@@ -142,6 +142,23 @@ export function runDeterministicReview(project: Project): {
         const textContent = el.content.text || "";
         const words = countWords(textContent);
         slideTotalWords += words;
+
+        // Empty text detection
+        if (textContent.trim() === "") {
+          issues.push({
+            id: `empty-text-${el.id}`,
+            title: `Empty Text Block (Slide ${slideNumber})`,
+            message: `Text element on Slide ${slideNumber} contains no text content. Remove or populate with descriptive design information.`,
+            severity: "warning",
+            category: "text_density",
+            slideId: slide.id,
+            slideIndex: slideIdx,
+            elementId: el.id,
+            elementName: "Empty Text",
+            suggestedAction: "shorten_text",
+            source: "deterministic",
+          });
+        }
 
         // Placeholder text detection
         const lower = textContent.toLowerCase();
@@ -186,17 +203,36 @@ export function runDeterministicReview(project: Project): {
 
         // Font size hierarchy checks
         const fontSize = el.content.fontSize || 24;
-        if (fontSize < 16) {
+        const isHeading =
+          el.content.fontWeight === "bold" ||
+          el.content.fontWeight === "semibold" ||
+          (words <= 8 && el.y < 350);
+
+        if (isHeading && fontSize < 28) {
           issues.push({
-            id: `small-font-${el.id}`,
-            title: `Small Font Size (${fontSize}px)`,
-            message: `Text font size (${fontSize}px) is below the recommended 16px presentation minimum. Text may be unreadable on projection screens or laptops.`,
+            id: `small-heading-${el.id}`,
+            title: `Small Heading Font Size (${fontSize}px)`,
+            message: `Slide heading font size (${fontSize}px) is below the recommended 28px architectural presentation minimum. Headings should anchor the visual hierarchy.`,
             severity: "warning",
             category: "visual_hierarchy",
             slideId: slide.id,
             slideIndex: slideIdx,
             elementId: el.id,
-            elementName: "Small Text",
+            elementName: "Slide Heading",
+            suggestedAction: "adjust_typography",
+            source: "deterministic",
+          });
+        } else if (!isHeading && fontSize < 16) {
+          issues.push({
+            id: `small-font-${el.id}`,
+            title: `Small Body Font Size (${fontSize}px)`,
+            message: `Body text font size (${fontSize}px) is below the recommended 16px presentation minimum. Text may be unreadable on projection screens or laptops.`,
+            severity: "warning",
+            category: "visual_hierarchy",
+            slideId: slide.id,
+            slideIndex: slideIdx,
+            elementId: el.id,
+            elementName: "Body Text",
             suggestedAction: "adjust_typography",
             source: "deterministic",
           });
@@ -346,7 +382,7 @@ export function runDeterministicReview(project: Project): {
         slideIndex: slideIdx,
         source: "deterministic",
       });
-    } else if (utilizationRatio > 0.78) {
+    } else if (utilizationRatio > 0.75) {
       issues.push({
         id: `high-crowding-${slide.id}`,
         title: `Visual Crowding (Slide ${slideNumber})`,
@@ -405,62 +441,151 @@ function generateAdaptiveChecklist(project: Project): AECChecklistItem[] {
     return [
       {
         category: "Interior Design",
-        item: "Project Identity & Concept Narrative",
+        item: "Project Identity & Typology",
         status: project.title ? "pass" : "missing",
-        notes: "Project title and aesthetic mood are defined.",
+        notes: "Clear project naming, aesthetic tone, and spatial brief.",
       },
       {
         category: "Interior Design",
-        item: "Material Palette & Tactile Finishes",
-        status: allText.includes("material") || allText.includes("finish") || hasInfoCards ? "pass" : "attention",
-        notes: "Detailed material specifications and textures.",
+        item: "Spatial Concept & Mood",
+        status: allSlideTitles.includes("concept") || allText.includes("concept") || allText.includes("mood") ? "pass" : "attention",
+        notes: "Governing interior concept and experiential intent.",
       },
       {
         category: "Interior Design",
-        item: "Lighting & Acoustic Strategy",
-        status: allText.includes("light") || allText.includes("acoustic") ? "pass" : "attention",
-        notes: "Integration of ambient/task lighting and acoustic dampening.",
+        item: "Material Palette & Textures",
+        status: allText.includes("material") || hasInfoCards ? "pass" : "attention",
+        notes: "Specified surfaces, textiles, and tactile materials.",
       },
       {
         category: "Interior Design",
-        item: "Spatial Zoning & FF&E Schedule",
-        status: hasHotspots || allSlideTitles.includes("program") ? "pass" : "missing",
-        notes: "Callouts identifying custom joinery, loose furniture, and spatial zones.",
+        item: "Architectural Finishes",
+        status: allText.includes("finish") || allText.includes("timber") || allText.includes("stone") ? "pass" : "attention",
+        notes: "Flooring, wall finishes, joinery details, and hardware.",
       },
       {
         category: "Interior Design",
-        item: "Before & After Transformation",
-        status: hasComparison ? "pass" : "attention",
-        notes: "Split slider showcasing initial shell vs. completed fitout.",
+        item: "Lighting Strategy",
+        status: allText.includes("light") || allText.includes("luminaire") ? "pass" : "attention",
+        notes: "Integration of ambient, task, and architectural accent lighting.",
+      },
+      {
+        category: "Interior Design",
+        item: "FF&E Schedule",
+        status: allText.includes("furniture") || allText.includes("ff&e") || hasHotspots ? "pass" : "missing",
+        notes: "Loose furniture, custom joinery, and fixture specifications.",
+      },
+      {
+        category: "Interior Design",
+        item: "Acoustic Strategy",
+        status: allText.includes("acoustic") || allText.includes("sound") || allText.includes("absorption") ? "pass" : "attention",
+        notes: "Reverberation control, acoustic wall panels, and ceiling baffles.",
+      },
+      {
+        category: "Interior Design",
+        item: "Spatial Flow & Zoning",
+        status: allSlideTitles.includes("plan") || allText.includes("circulation") || allText.includes("flow") ? "pass" : "attention",
+        notes: "Circulation corridors, threshold transitions, and programmatic zoning.",
+      },
+      {
+        category: "Interior Design",
+        item: "Conclusion & Phasing",
+        status: hasButtons ? "pass" : "attention",
+        notes: "Concluding milestone with interactive next-step CTA.",
       },
     ];
   }
 
-  if (category.includes("urban") || category.includes("landscape")) {
+  if (category.includes("urban")) {
     return [
       {
-        category: "Urban / Landscape",
-        item: "Site Topography & Urban Context",
-        status: allText.includes("site") || allText.includes("context") ? "pass" : "missing",
-        notes: "Surrounding neighborhood connections and site morphology.",
+        category: "Urban Design",
+        item: "Urban Context & Morphology",
+        status: allText.includes("context") || allText.includes("site") ? "pass" : "missing",
+        notes: "City fabric, surrounding neighborhood linkages, and morphology.",
       },
       {
-        category: "Urban / Landscape",
-        item: "Pedestrian & Public Realm Mobility",
-        status: allText.includes("pedestrian") || allText.includes("circulation") ? "pass" : "attention",
-        notes: "Walkability paths and public access corridors.",
+        category: "Urban Design",
+        item: "Public Realm & Civic Space",
+        status: allText.includes("public") || allText.includes("plaza") || allText.includes("civic") ? "pass" : "attention",
+        notes: "Pedestrian plazas, streetscapes, and open civic spaces.",
       },
       {
-        category: "Urban / Landscape",
-        item: "Ecological & Stormwater Systems",
-        status: allText.includes("stormwater") || allText.includes("native") || allText.includes("sustain") ? "pass" : "attention",
-        notes: "Bioswales, permeable surfaces, and microclimate mitigation.",
+        category: "Urban Design",
+        item: "Mobility & Transit Networks",
+        status: allText.includes("transit") || allText.includes("pedestrian") || allText.includes("mobility") ? "pass" : "attention",
+        notes: "Multi-modal transit connectivity, bike lanes, and walkability.",
       },
       {
-        category: "Urban / Landscape",
-        item: "Interactive Masterplan Exploration",
-        status: hasHotspots ? "pass" : "missing",
-        notes: "Clickable hotspots indicating key programmatic plazas and nodes.",
+        category: "Urban Design",
+        item: "Density & Massing Strategy",
+        status: allText.includes("density") || allText.includes("massing") || allText.includes("height") ? "pass" : "attention",
+        notes: "Floor area ratio, building envelopes, and solar envelope massing.",
+      },
+      {
+        category: "Urban Design",
+        item: "Community Impact & Amenities",
+        status: allText.includes("community") || allText.includes("social") || allText.includes("civic") ? "pass" : "attention",
+        notes: "Public amenities, affordable housing, and neighborhood benefits.",
+      },
+      {
+        category: "Urban Design",
+        item: "Environmental Strategy & Resilience",
+        status: allText.includes("resilien") || allText.includes("climate") || allText.includes("green") ? "pass" : "attention",
+        notes: "Urban heat island mitigation, stormwater grids, and canopy cover.",
+      },
+      {
+        category: "Urban Design",
+        item: "Conclusion & Phasing Strategy",
+        status: hasButtons ? "pass" : "attention",
+        notes: "Implementation roadmap, stakeholder engagement, and next-step actions.",
+      },
+    ];
+  }
+
+  if (category.includes("landscape")) {
+    return [
+      {
+        category: "Landscape Architecture",
+        item: "Site & Topography",
+        status: allText.includes("topograph") || allText.includes("slope") || allText.includes("terrain") ? "pass" : "missing",
+        notes: "Existing site grading, landform morphology, and elevation contours.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Planting Palette & Ecology",
+        status: allText.includes("plant") || allText.includes("native") || allText.includes("species") ? "pass" : "attention",
+        notes: "Native vegetation matrix, biodiversity corridors, and tree canopy.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Microclimate Mitigation",
+        status: allText.includes("shade") || allText.includes("wind") || allText.includes("microclimate") ? "pass" : "attention",
+        notes: "Solar shading, prevailing wind buffers, and comfort analysis.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Stormwater Management",
+        status: allText.includes("stormwater") || allText.includes("bioswale") || allText.includes("permeable") ? "pass" : "attention",
+        notes: "Rain gardens, bioswales, runoff attenuation, and water harvesting.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Materials & Hardscape",
+        status: allText.includes("paving") || allText.includes("stone") || hasInfoCards ? "pass" : "attention",
+        notes: "Permeable pavers, retaining walls, site furnishings, and lighting.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Public Experience & Access",
+        status: hasHotspots || allText.includes("trail") || allText.includes("path") ? "pass" : "attention",
+        notes: "Universal accessibility, interactive exploration, and viewing nodes.",
+      },
+      {
+        category: "Landscape Architecture",
+        item: "Conclusion & Stewardship",
+        status: hasButtons ? "pass" : "attention",
+        notes: "Maintenance lifecycle, stewardship plan, and concluding interactive CTA.",
       },
     ];
   }
@@ -475,21 +600,21 @@ function generateAdaptiveChecklist(project: Project): AECChecklistItem[] {
     },
     {
       category: "Architecture",
-      item: "Architectural Concept / Parti",
+      item: "Site & Context Integration",
+      status: allText.includes("site") || allText.includes("context") || allSlideTitles.includes("site") ? "pass" : "attention",
+      notes: "Orientation, urban/natural fabric adjacency, and access axes.",
+    },
+    {
+      category: "Architecture",
+      item: "Design Concept / Parti",
       status: allSlideTitles.includes("concept") || allText.includes("parti") || allText.includes("concept") ? "pass" : "attention",
       notes: "Governing spatial logic and primary conceptual pillars.",
     },
     {
       category: "Architecture",
-      item: "Floor Plan / Spatial Arrangement",
+      item: "Spatial Organization & Floor Plan",
       status: allSlideTitles.includes("plan") || allText.includes("plan") ? "pass" : "attention",
-      notes: "General arrangement plan depicting functional zones.",
-    },
-    {
-      category: "Architecture",
-      item: "Interactive Drawing Hotspots",
-      status: hasHotspots ? "pass" : "missing",
-      notes: "Interactive pins allowing reviewers to explore technical callouts.",
+      notes: "General arrangement plan depicting functional zones and circulation.",
     },
     {
       category: "Architecture",
@@ -501,7 +626,13 @@ function generateAdaptiveChecklist(project: Project): AECChecklistItem[] {
       category: "Architecture",
       item: "Passive Environmental Strategy",
       status: allText.includes("daylight") || allText.includes("solar") || allText.includes("energy") || allText.includes("carbon") ? "pass" : "attention",
-      notes: "Daylight harvesting, ventilation strategies, and carbon targets.",
+      notes: "Daylight harvesting, natural ventilation, and carbon targets.",
+    },
+    {
+      category: "Architecture",
+      item: "Interactive Drawing Hotspots",
+      status: hasHotspots ? "pass" : "missing",
+      notes: "Interactive pins allowing reviewers to explore technical callouts.",
     },
     {
       category: "Architecture",

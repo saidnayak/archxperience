@@ -282,16 +282,18 @@ Phase 8 elevates ArchXperience from a generative tool to an intelligent architec
 
 #### B. Deterministic Layout & Readability Engine
 Runs entirely client-side with zero network calls and sub-second execution:
-- **Slide Text Density**: Flags slides exceeding 120 words for presentation readability.
-- **Single-Slide Word Count Overload**: Flags slides exceeding 250 words.
-- **Excessive Bullet Points**: Detects lists with more than 6 items.
-- **Hierarchy Inversion**: Identifies subtitles or body text styled larger than headings.
-- **Element Overlaps**: Computes bounding box intersections between text and visual elements.
-- **Canvas Edge Margins**: Enforces a 40px safe buffer around the 1920×1080 canonical canvas.
-- **Broken Navigation Links**: Validates target slide IDs for button and hotspot elements.
-- **Orphan Slides**: Warns when slides cannot be reached sequentially or via links.
-- **Missing Closing CTA**: Checks if the final slide lacks contact info or a forward action.
-- **Visual Drawings Without Hotspots**: Flags floor plans and axonometric diagrams that lack interactive hotspots.
+- **Slide Text Density**: Flags slides exceeding 120 words total for architectural visual balance.
+- **Single Text Element Density**: Flags individual text blocks exceeding 60 words.
+- **Typography Scale Hierarchy**: Enforces minimum 28px for headings and 16px for body copy.
+- **Empty / Placeholder Text Detection**: Identifies empty text blocks and placeholder text ("lorem ipsum", "untitled", "sample text").
+- **Canvas Edge Safe Margins**: Enforces 60px safe padding on the canonical 1920×1080 canvas (`x < 60`, `x + width > 1860`, `y < 60`, `y + height > 1020`).
+- **AABB Overlap Engine**: Detects problematic collisions among text, images, info cards, and buttons while exempting intentional hotspot pins and full-bleed visuals.
+- **Canvas Utilization Ratio**: Flags low canvas utilization (< 15%) and visual crowding (> 75%).
+- **Broken Navigation Links**: Verifies `targetSlideId` references for button and hotspot elements against live slide IDs.
+- **Orphan Slides**: Warns when slides cannot be reached via navigation links or overview buttons.
+- **Drawing Without Hotspots**: Detects architectural drawings (floor plans, site plans, sections) lacking interactive exploration callouts.
+- **Missing Closing CTA**: Checks if the final concluding slide lacks an interactive call-to-action button.
+- **Deck Length Guidelines**: Recommends decks stay between 3 and 12 slides for optimal client/jury retention.
 
 #### C. Slide Assistant ("Improve This Slide")
 - Non-destructive side drawer accessible from the Editor Properties Panel.
@@ -334,7 +336,33 @@ npx supabase functions deploy review-presentation
 npx supabase functions deploy assist-slide
 ```
 
-### 4. Transaction Safety & Non-Destructive Principles
+### 4. Security, Privacy & Safety Policies
+
+#### A. Authentication & Secret Isolation
+- All AI Edge Functions require authenticated users via standard Supabase JWT verification (`Authorization: Bearer <token>`).
+- Anonymous calls receive HTTP 401 Unauthorized.
+- `GEMINI_API_KEY` is strictly managed server-side via Supabase Edge Function environment secrets and is **never** exposed in client bundles.
+- The client cannot supply arbitrary API keys or select arbitrary model names.
+
+#### B. Guest Mode Limitations & Cloud Requirement
+- **Guest Mode**: Guest architects have full access to the 100% client-side Deterministic Layout & Readability Engine, offline editing, and local presentation storage.
+- **Cloud Requirement**: AI-powered features (Experience Review AI critique, Slide Assistant, Hotspot Advisor, Tone Tuner) require a Cloud Workspace with authentication. The UI displays clear upgrade/sign-in prompts without disrupting local editing.
+
+#### C. Privacy & Data Minimization
+- Payload minimization: only essential presentation metadata (title, category, audience, slide headings, truncated text blocks, element roles) is transmitted to the AI Edge Functions.
+- No user IDs, email addresses, Supabase tokens, passwords, raw database records, screenshots, or canvas DOM trees are transmitted.
+- User input is wrapped in explicit untrusted data delimiters (`""" ... """`) with system instructions strictly forbidding code execution or instruction injection.
+
+#### D. Rate Limiting & Transient Review Caching
+- AI features are triggered solely by explicit user interaction (no background polling or auto-triggering on keystrokes).
+- Re-click actions are disabled during active generation with stage indicators.
+- AI review results are stored in transient component state and are re-evaluated on demand to prevent displaying stale critiques.
+
+#### E. Conceptual Technical Information Policy
+- Any AI-generated technical metrics or material performance values not explicitly provided by the user are labeled as **"Design Intent"**, **"Target Metric"**, or **"Conceptual Specification"**.
+- The AI engine is strictly instructed to never fabricate building code compliance, fire ratings, or certified guarantees (such as LEED/BREEAM certifications) unless verified in the project brief.
+
+### 5. Transaction Safety & Non-Destructive Principles
 1. **AI Proposes, User Disposes**: The AI engine never mutates presentation state autonomously or silently. Every proposal must be explicitly accepted by the user.
-2. **Atomic Undo/Redo**: All multi-element edits are wrapped in `useProjectStore.getState().startTransaction()` and `commitTransaction()`. A single press of `Ctrl+Z` cleanly reverts all modified elements to their exact pre-AI state.
-3. **Graceful Degradation**: If offline or running in guest mode, deterministic checks and local fallbacks continue to function smoothly without crashing.
+2. **Atomic Undo/Redo**: All multi-element edits are wrapped in `useEditorStore.getState().startTransaction()` and `commitTransaction()`. A single press of `Ctrl+Z` cleanly reverts all modified elements to their exact pre-AI state.
+3. **Graceful Degradation**: If offline, unauthenticated, or if the AI provider encounters a rate limit or timeout, deterministic checks and local fallbacks continue to function smoothly without crashing.

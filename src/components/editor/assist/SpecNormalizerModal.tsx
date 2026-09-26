@@ -23,27 +23,47 @@ export const SpecNormalizerModal: React.FC<SpecNormalizerModalProps> = ({
   const { startTransaction, commitTransaction, updateElement, triggerAutosave } = useEditorStore();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    if (isOpen && element) {
-      const rawText =
-        ("description" in element.content ? element.content.description : "") ||
-        ("text" in element.content ? element.content.text : "") ||
-        ("title" in element.content ? element.content.title : "");
+  const handleClose = () => {
+    setSpecs([]);
+    setIsLoading(false);
+    onClose();
+  };
 
-      if (rawText) {
-        setIsLoading(true);
-        requestSpecNormalization(element.id, rawText)
-          .then((res) => {
-            setSpecs(res.specs || []);
-          })
-          .catch((err) => {
+  useEffect(() => {
+    if (!isOpen || !element) {
+      return;
+    }
+
+    const rawText =
+      ("description" in element.content ? element.content.description : "") ||
+      ("text" in element.content ? element.content.text : "") ||
+      ("title" in element.content ? element.content.title : "");
+
+    if (!rawText) return;
+
+    let isMounted = true;
+    const timer = setTimeout(() => {
+      setIsLoading(true);
+      requestSpecNormalization(element.id, rawText)
+        .then((res) => {
+          if (isMounted) setSpecs(res.specs || []);
+        })
+        .catch((err) => {
+          if (isMounted) {
             console.error("[SpecNormalizer] Failed:", err);
             showToast("Could not normalize specifications", "danger");
-          })
-          .finally(() => setIsLoading(false));
-      }
-    }
-  }, [isOpen, element?.id]);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setIsLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [isOpen, element, showToast]);
 
   if (!isOpen || !element) return null;
 
@@ -86,7 +106,7 @@ export const SpecNormalizerModal: React.FC<SpecNormalizerModalProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Structure Architectural Specifications"
       description="Format descriptive notes into clean, presentation-ready specification pairs."
       maxWidth="md"
@@ -145,7 +165,7 @@ export const SpecNormalizerModal: React.FC<SpecNormalizerModalProps> = ({
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-              <Button size="sm" variant="ghost" onClick={onClose}>
+              <Button size="sm" variant="ghost" onClick={handleClose}>
                 Cancel
               </Button>
               <Button
